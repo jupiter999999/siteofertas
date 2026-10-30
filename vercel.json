@@ -1,1 +1,1 @@
-{"rewrites":[{"source":"/admin","destination":"/admin.html"}]}
+{"rewrites":[{"source":"/admin","destination":"/admin.html"},{"source":"/assets/drika-premium.webp","destination":"https://promocoes-da-drika.vercel.app/drika.webp"}]}
