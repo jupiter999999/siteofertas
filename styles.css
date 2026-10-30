@@ -4,3 +4,7 @@
 
 /* Arte aprovada: banner integral, sem foto separada nem textos duplicados */
 .drika-approved-hero{display:block;min-height:0;background:#fff8ed;padding:0;overflow:hidden;border-radius:22px;box-shadow:0 20px 55px #6a351e25}.drika-approved-hero .approved-banner{width:100%;height:auto;display:block;object-fit:contain;max-width:100%}.drika-approved-hero .approved-actions{display:flex;justify-content:center;gap:13px;align-items:center;flex-wrap:wrap;padding:17px 15px 23px;background:#fff5e8}.drika-approved-hero .btn-primary{background:#e87a23;color:#fff}.drika-approved-hero .btn-outline{border:1px solid #ddb78e;color:#6d381f}@media(max-width:650px){.drika-approved-hero{border-radius:14px}.drika-approved-hero .approved-actions{padding:13px 8px 17px;gap:8px}.drika-approved-hero .approved-actions a{font-size:12px;padding:12px}}
+
+/* Fundo creme suave harmonizado com o banner aprovado */
+body{background:#fff4e4;background-image:linear-gradient(180deg,#fff7ec 0%,#fff1df 52%,#ffefdc 100%);background-attachment:fixed}
+.store-list button,.card,.search-wrap{box-shadow:0 9px 27px rgba(115,67,33,.06)}
