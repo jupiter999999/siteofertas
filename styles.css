@@ -29,3 +29,18 @@ body{
   background-attachment:fixed,fixed,fixed;
 }
 @media(max-width:650px){body{background-size:300px 375px,cover,cover}}
+
+/* Identidade DRINKA ECONOMIZA */
+.nav .logo{font-family:'Outfit',sans-serif;letter-spacing:-.45px}.nav .logo b{color:#d96520}
+.drika-approved-hero.drinka-hero{display:grid;grid-template-columns:51% 49%;min-height:535px;overflow:hidden;background:#fff4e2;border-radius:26px}
+.drinka-hero-copy{position:relative;z-index:2;padding:49px 38px 45px 54px;background:radial-gradient(circle at top left,#fffaf0 4%,#fff2dd 68%,#ffe4be 100%);display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
+.drinka-stores{font-family:Outfit,sans-serif;font-size:10px;letter-spacing:1.05px;font-weight:900;color:#c47c45;white-space:nowrap;margin-bottom:46px}
+.drinka-stores span{padding:0 7px;color:#d7a679}.drinka-kicker{color:#b85e22;font-size:11px;font-weight:900;letter-spacing:2.1px}
+.drinka-hero-copy h1{font-family:Outfit,sans-serif;letter-spacing:-3px;font-size:clamp(53px,5vw,82px);line-height:1.02;color:#361c10;margin:19px 0}
+.drinka-hero-copy h1 em{font-style:normal;display:block;color:#e9771d}.drinka-hero-copy p{font-size:16px;line-height:1.8;color:#76523b;max-width:460px;margin:0 0 25px}
+.drinka-points{display:flex;flex-wrap:wrap;gap:12px;color:#996b4b;font-size:11px;font-weight:800;margin-bottom:28px}
+.drinka-hero-actions{display:flex;flex-wrap:wrap;gap:10px}.drinka-hero-actions .btn-primary{background:#ed822c;color:#fff}.drinka-hero-actions .btn-outline{color:#67361f;border:1px solid #deaa78;background:transparent}
+.drinka-hero-portrait{min-height:535px;background-image:linear-gradient(90deg,rgba(97,43,9,.04),rgba(97,43,9,0) 30%),url('/assets/banner-drika.webp');background-size:cover;background-position:85% center;background-repeat:no-repeat;position:relative}
+.drinka-hero-portrait:after{content:'✦ Drinka Economiza';position:absolute;bottom:22px;right:25px;background:#fff5e8e8;border:1px solid #fff7ef;border-radius:30px;padding:13px 20px;font-family:Outfit,sans-serif;color:#7b3a1b;font-size:14px;font-weight:900;box-shadow:0 10px 35px #39150525}
+@media(max-width:1000px){.drinka-hero-copy{padding:40px 25px}.drinka-stores{font-size:9px;white-space:normal;margin-bottom:29px}.drinka-hero-copy h1{font-size:52px;letter-spacing:-2px}}
+@media(max-width:680px){.drika-approved-hero.drinka-hero{display:flex;flex-direction:column-reverse;min-height:0}.drinka-hero-portrait{min-height:340px;background-size:cover;background-position:78% center}.drinka-hero-copy{padding:35px 26px 42px;text-align:center;align-items:center}.drinka-stores{margin-bottom:15px}.drinka-hero-copy h1{font-size:51px;letter-spacing:-2px}.drinka-hero-copy p{font-size:14px}.drinka-points,.drinka-hero-actions{justify-content:center}.drinka-hero-portrait:after{right:12px;bottom:12px;font-size:12px}}
