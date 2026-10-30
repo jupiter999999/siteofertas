@@ -44,3 +44,84 @@ body{
 .drinka-hero-portrait:after{content:'✦ Drinka Economiza';position:absolute;bottom:22px;right:25px;background:#fff5e8e8;border:1px solid #fff7ef;border-radius:30px;padding:13px 20px;font-family:Outfit,sans-serif;color:#7b3a1b;font-size:14px;font-weight:900;box-shadow:0 10px 35px #39150525}
 @media(max-width:1000px){.drinka-hero-copy{padding:40px 25px}.drinka-stores{font-size:9px;white-space:normal;margin-bottom:29px}.drinka-hero-copy h1{font-size:52px;letter-spacing:-2px}}
 @media(max-width:680px){.drika-approved-hero.drinka-hero{display:flex;flex-direction:column-reverse;min-height:0}.drinka-hero-portrait{min-height:340px;background-size:cover;background-position:78% center}.drinka-hero-copy{padding:35px 26px 42px;text-align:center;align-items:center}.drinka-stores{margin-bottom:15px}.drinka-hero-copy h1{font-size:51px;letter-spacing:-2px}.drinka-hero-copy p{font-size:14px}.drinka-points,.drinka-hero-actions{justify-content:center}.drinka-hero-portrait:after{right:12px;bottom:12px;font-size:12px}}
+
+/* Correção final do banner Drinka Economiza: desktop e celular */
+.drika-approved-hero.drinka-hero .drinka-hero-portrait{
+  background-size:auto 160%;
+  background-position:86% 48%;
+}
+@media (max-width:680px){
+  html,body{max-width:100%;overflow-x:clip}
+  .announcement{padding:9px 16px;font-size:10px;line-height:1.35;letter-spacing:.1px}
+  .nav.shell{min-height:66px;padding:12px 17px 15px;justify-content:center}
+  .nav .logo{font-size:17px;white-space:nowrap;letter-spacing:-.45px}
+  .nav .logo-mark{font-size:21px}
+  .drika-approved-hero.drinka-hero{
+    display:flex;
+    flex-direction:column-reverse;
+    min-height:0;
+    margin:0 12px;
+    width:calc(100% - 24px);
+    border-radius:20px;
+    overflow:hidden;
+  }
+  .drika-approved-hero.drinka-hero .drinka-hero-portrait{
+    width:100%;
+    min-height:0;
+    height:clamp(235px,67vw,290px);
+    flex:none;
+    background-image:
+      linear-gradient(90deg,rgba(109,57,22,.15),transparent 30%),
+      url('/assets/banner-drika.webp');
+    background-size:100% 100%,auto 175%;
+    background-position:center,right 48%;
+    background-repeat:no-repeat;
+  }
+  .drinka-hero-portrait:after{display:none}
+  .drinka-hero-copy{
+    padding:23px 22px 28px;
+    gap:0;
+    align-items:center;
+    text-align:center;
+    min-width:0;
+    background:linear-gradient(165deg,#fffaf0 0%,#fff0da 100%);
+  }
+  .drinka-stores{display:none}
+  .drinka-kicker{font-size:10px;letter-spacing:1.4px;line-height:1.4}
+  .drinka-hero-copy h1{
+    font-size:clamp(33px,9.4vw,41px);
+    line-height:1.04;
+    letter-spacing:-1.6px;
+    margin:10px 0 12px;
+    max-width:100%;
+    overflow-wrap:normal;
+  }
+  .drinka-hero-copy h1 em{display:block}
+  .drinka-hero-copy p{font-size:13px;line-height:1.55;margin:0 0 17px;max-width:360px}
+  .drinka-points{display:none}
+  .drinka-hero-actions{display:flex;width:100%;flex-wrap:nowrap;gap:8px;justify-content:center}
+  .drinka-hero-actions a{
+    width:50%;
+    min-width:0;
+    padding:12px 9px;
+    font-size:12px;
+    line-height:1.2;
+    border-radius:10px;
+    gap:5px;
+    white-space:nowrap;
+  }
+  .benefits{padding-top:28px}
+  .shop{padding-top:40px}
+  .feature.drika-about{min-height:0}
+  .drika-about-visual{height:280px;min-height:280px}
+  .drika-about h2{font-size:clamp(28px,8vw,35px)}
+  .drika-decor span:last-child{margin-left:135px}
+  .drika-sticker{max-width:90%;white-space:normal;text-align:center;font-size:11px}
+}
+@media (max-width:365px){
+  .nav .logo{font-size:15px}
+  .drika-approved-hero.drinka-hero .drinka-hero-portrait{height:230px;background-size:100% 100%,auto 183%}
+  .drinka-hero-copy h1{font-size:32px}
+  .drinka-hero-copy{padding:20px 17px 25px}
+  .drinka-hero-actions a{font-size:11px;padding:11px 7px}
+}
