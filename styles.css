@@ -292,3 +292,17 @@ body{
   .drika-approved-hero.drinka-hero .drinka-hero-copy{padding:17px 14px 20px!important}
   .drika-approved-hero.drinka-hero .drinka-hero-actions a{font-size:11px!important;padding:12px 5px!important}
 }
+
+
+/* Refinamento do enquadramento mobile após inspecionar o corte real do banner */
+@media(max-width:760px){
+ .drika-approved-hero.drinka-hero .drinka-hero-portrait{
+  background-size:auto 185%!important;
+  background-position:right top!important;
+ }
+ .drika-approved-hero.drinka-hero .drinka-hero-portrait::before{
+  content:'';display:block;position:absolute;z-index:2;
+  pointer-events:none;top:0;left:0;bottom:0;width:48px;
+  background:linear-gradient(90deg,rgba(244,202,158,.96) 0%,rgba(238,190,145,.86) 25%,transparent 100%);
+ }
+}
