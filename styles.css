@@ -191,3 +191,104 @@ body{
   .drika-approved-hero.drinka-hero .drinka-hero-copy h1{font-size:32px}
   .drika-approved-hero.drinka-hero .drinka-hero-actions a{font-size:11px;padding:12px 6px}
 }
+
+/* Restaurar o fundo fotográfico de compras aprovado, sem perder o fundo laranja do site.
+   Somente o enquadramento e a composição mobile mudam. */
+@media (min-width:761px){
+  .drika-approved-hero.drinka-hero{
+    background-image:
+      linear-gradient(90deg,#fff8eefa 0%,#fff6eafa 43%,#fff4e8ed 50%,#fff4e873 62%,transparent 72%),
+      url('/assets/banner-drika.webp') !important;
+    background-size:cover,cover!important;
+    background-position:center,center 43%!important;
+    background-repeat:no-repeat!important;
+  }
+  .drika-approved-hero.drinka-hero .drinka-hero-copy{
+    background:transparent!important;
+  }
+  .drika-approved-hero.drinka-hero .drinka-hero-portrait{
+    background:none!important;
+  }
+}
+@media(max-width:760px){
+  /* Keep the original shopping scene, with an actual crop that excludes its old lettering. */
+  .drika-approved-hero.drinka-hero{
+    display:flex!important;
+    flex-direction:column-reverse!important;
+    margin:0 12px!important;
+    width:calc(100% - 24px)!important;
+    min-height:0!important;
+    border-radius:19px!important;
+    background:#fff6e8!important;
+    overflow:hidden!important;
+  }
+  .drika-approved-hero.drinka-hero .drinka-hero-portrait{
+    display:block!important;
+    min-height:0!important;
+    width:100%!important;
+    height:clamp(208px,62vw,257px)!important;
+    flex:none!important;
+    background-image:url('/assets/banner-drika.webp')!important;
+    background-size:auto 175%!important;
+    background-position:right 21%!important;
+    background-repeat:no-repeat!important;
+    background-color:#a95624!important;
+  }
+  .drika-approved-hero.drinka-hero .drinka-mobile-portrait{display:none!important}
+  .drika-approved-hero.drinka-hero .drinka-hero-portrait::after{display:none!important}
+  .drika-approved-hero.drinka-hero .drinka-hero-copy{
+    width:100%!important;
+    min-width:0!important;
+    padding:20px 22px 24px!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:center!important;
+    text-align:center!important;
+    background:linear-gradient(145deg,#fffaf0 0%,#fff0d9 100%)!important;
+  }
+  .drika-approved-hero.drinka-hero .drinka-hero-copy h1{display:none!important}
+  .drinka-hero-copy .drinka-stores,
+  .drinka-hero-copy .drinka-points{display:none!important}
+  .drika-approved-hero.drinka-hero .drinka-kicker{
+    font-size:13px!important;
+    line-height:1.5!important;
+    letter-spacing:.95px!important;
+    color:#b66024!important;
+    margin:0 0 11px!important;
+  }
+  .drika-approved-hero.drinka-hero .drinka-hero-copy p{
+    margin:0 0 18px!important;
+    max-width:330px!important;
+    color:#664532!important;
+    font-size:13px!important;
+    line-height:1.65!important;
+  }
+  .drika-approved-hero.drinka-hero .drinka-hero-actions{
+    display:flex!important;
+    width:100%!important;
+    gap:9px!important;
+    flex-wrap:nowrap!important;
+    justify-content:center!important;
+  }
+  .drika-approved-hero.drinka-hero .drinka-hero-actions a{
+    min-width:0!important;
+    flex:1!important;
+    width:auto!important;
+    padding:13px 7px!important;
+    font-size:12px!important;
+    line-height:1.2!important;
+    border-radius:11px!important;
+    white-space:nowrap!important;
+  }
+  .nav.shell{padding-top:15px!important;padding-bottom:15px!important}
+  .benefits{padding-top:29px!important}
+}
+@media(max-width:355px){
+  .drika-approved-hero.drinka-hero .drinka-hero-portrait{
+    height:210px!important;
+    background-size:auto 184%!important;
+  }
+  .drika-approved-hero.drinka-hero .drinka-hero-copy{padding:17px 14px 20px!important}
+  .drika-approved-hero.drinka-hero .drinka-hero-actions a{font-size:11px!important;padding:12px 5px!important}
+}
