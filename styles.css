@@ -125,3 +125,7 @@ body{
   .drinka-hero-copy{padding:20px 17px 25px}
   .drinka-hero-actions a{font-size:11px;padding:11px 7px}
 }
+
+/* Enquadramento final: manter rosto e topo da foto visíveis */
+.drika-approved-hero.drinka-hero .drinka-hero-portrait{background-position:86% 10%}
+@media(max-width:680px){.drika-approved-hero.drinka-hero .drinka-hero-portrait{background-position:center,right 10%}}
