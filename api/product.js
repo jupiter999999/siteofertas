@@ -158,15 +158,16 @@ function cleanTitle(t,store){
   const s=decode(t).replace(/\s+/g,' ').trim().slice(0,190);
   if(!s||s.length<12)return '';
   if(/^(shopee|shopee brasil|amazon(?:\.com(?:\.br)?)?|mercado livre|magalu|just a moment|access denied|captcha|robot check|página não encontrada|acesso negado|verifique se você é humano|login|sign in|please enable javascript)\s*[.!–-]?$/i.test(s))return '';
-  if(/enable javascript|please wait|automated access|access denied|verify you are human|captcha|cloudflare|não foi possível|página não encontrada/i.test(s))return '';
+  if(/enable javascript|please wait|automated access|access denied|verify you are human|captcha|cloudflare|não foi possível|página não encontrada|ofertas incríveis|melhores preços do mercado|loja oficial|shopee brasil \||shopee brasil -|início da shopee|sua loja online|frete gr[aá]tis em milhares de produtos/i.test(s))return '';
   return s;
 }
+function isGenericImage(image){return /(?:homepage|shopee-mobilemall|\/(?:logo|brand|icons?|favicon|header)[-_/.]|shopee.*home|banner[-_/]|\/shopee\/shopee|shopee-mobilemall-live-sg)/i.test(String(image||''))}
 function cleanPreview(input,store){
   if(!input||typeof input!=='object')return null;
   const title=cleanTitle(input.title,store);
   let image=imageUrl(input.image);
   try{if(!image||!image.startsWith('https://'))image='';else image=new URL(image).href}catch{image=''}
-  if(!title&&!image)return null;
+  if(isGenericImage(image))image='';if(!title)return null;
   const price=priceNumber(input.price);
   const oldPrice=priceNumber(input.oldPrice);
   return {store,title,image,price:price||null,oldPrice:oldPrice&&price&&oldPrice>price?oldPrice:null,priceSource:price?'product_metadata':null,partial:!title||!image||!price};
@@ -201,7 +202,7 @@ async function enhancedScan(input){
   const store=shopOf(url.hostname);
   let result=null;
   try{result=await scan(input)}catch(e){result={store,partial:true,title:'',image:'',price:null,oldPrice:null,warning:e?.message||'Falha ao consultar a loja'};}
-  if(result?.title&&result?.image&&result?.price)return result;
+  if(result?.title&&!cleanTitle(result.title,store))result.title='';if(result?.image&&isGenericImage(result.image))result.image='';if(result?.title&&result?.image&&result?.price)return result;
   for(const provider of [microlinkPreview,readerPreview]){
     if(result?.title&&result?.image)break;
     try{
@@ -218,6 +219,8 @@ async function enhancedScan(input){
     }catch{}
   }
   if(!result)result={store,title:'',image:'',price:null,oldPrice:null};
+  if(result.title&&!cleanTitle(result.title,store))result.title='';
+  if(result.image&&isGenericImage(result.image))result.image='';
   result.partial=!(result.title&&result.image&&result.price);
   if(result.partial){
     if(!result.title&&!result.image)result.warning='A Shopee ou Amazon não liberou a prévia para importação. Você ainda pode cadastrar o produto manualmente e enviar uma foto.';
