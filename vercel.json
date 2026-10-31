@@ -12,6 +12,9 @@
   "functions": {
     "api/product.js": {
       "maxDuration": 40
+    },
+    "api/drinka-scrapedo-probe.js": {
+      "maxDuration": 45
     }
   }
 }
