@@ -113,8 +113,9 @@ $('fetch').onclick=async()=>{
    preview();
    const foundName=Boolean(val('name')),foundPhoto=Boolean(val('image')),foundPrice=num(val('price'))>0;
    if(foundName&&foundPhoto&&foundPrice)note('Dados encontrados. Confirme o preço e publique a oferta.');
-   else if(foundName&&foundPrice)note('Nome e preço encontrados. A foto não foi liberada: envie uma imagem do produto abaixo.');
-   else if(foundName)note('Nome encontrado. A loja não disponibilizou foto ou preço; confira o anúncio e complete antes de publicar.');
+   else if(foundName&&foundPrice)note('Nome e preço encontrados, mas falta a foto.');
+   else if(foundName&&foundPhoto)note('Nome e foto encontrados. Ainda falta o preço: atualize a extensão Leitor Drinka no Chrome e busque novamente.');
+   else if(foundName)note('Nome encontrado. Foto e preço ainda não foram identificados.');
    else note(d.warning||'Não foi possível identificar o produto automaticamente. Nenhum dado incorreto será publicado.');
  }catch(err){
    if(shared.title||shared.price)note('A loja bloqueou a consulta, mas aproveitei os dados da mensagem. Confira e envie uma foto, se necessário.');
