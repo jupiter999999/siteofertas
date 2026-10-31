@@ -196,12 +196,71 @@ async function readerPreview(input,store){
   const result=cleanPreview({title,image},store);
   return result?{...result,source:'reader_preview'}:null;
 }
+
+/* Leitor especializado no servidor. A credencial vive só em SCRAPEDO_API_TOKEN na Vercel.
+   Amazon: endpoint de produto em JSON; Shopee: HTML renderizado, sem inferir preço incorreto. */
+const cache=new Map(), CACHE_MS=15*60*1000;
+function cacheGet(url){const e=cache.get(url);if(!e)return null;if(Date.now()-e.at>CACHE_MS){cache.delete(url);return null}return {...e.data,cache:true}}
+function cacheSet(url,data){if(cache.size>=80)cache.delete(cache.keys().next().value);cache.set(url,{at:Date.now(),data});}
+function chooseProduct(data,store,source){
+  const title=cleanTitle(data.title||data.name,store);
+  let image=imageUrl(data.image||data.thumbnail||(Array.isArray(data.images)?data.images[0]:null));
+  try{if(image)image=new URL(image).href;if(!image.startsWith('https://')||isGenericImage(image))image=''}catch{image=''}
+  const price=priceNumber(data.price?.amount??data.price);
+  const original=priceNumber(data.oldPrice??data.list_price);
+  if(!title)return null;
+  return {store,title,image,price:price||null,oldPrice:original&&price&&original>price?original:null,
+    priceSource:price?'product_metadata':null,partial:!(title&&image&&price),source};
+}
+async function specialisedScrape(input,store){
+  const key=process.env.SCRAPEDO_API_TOKEN;
+  if(!key)return null;
+  const cached=cacheGet(input);if(cached)return cached;
+  const endpoint=store==='Amazon'?'https://api.scrape.do/plugin/amazon/pdp':'https://api.scrape.do/';
+  const api=new URL(endpoint);
+  api.searchParams.set('token',key);
+  let asin=null;
+  if(store==='Amazon'){
+    asin=input.match(/\/(?:dp|gp\/product|product)\/([A-Z0-9]{10})(?:[/?#]|$)/i)?.[1]?.toUpperCase()||null;
+    if(!asin)return null;
+    api.searchParams.set('asin',asin);api.searchParams.set('geocode','br');
+  }else if(store==='Shopee'){
+    api.searchParams.set('url',input);api.searchParams.set('render','true');
+    api.searchParams.set('geoCode','br');api.searchParams.set('customWait','1200');
+    api.searchParams.set('timeout','14000');api.searchParams.set('disableRetry','true');
+  }else return null;
+  let response;
+  try{response=await fetch(api.href,{signal:AbortSignal.timeout(18000),headers:{accept:store==='Amazon'?'application/json':'text/html'}})}
+  catch{return null}
+  if(!response.ok)return null;
+  let parsed;
+  if(store==='Amazon'){
+    let data;try{data=await response.json()}catch{return null}
+    if(data.status==='error'||(data.asin&&String(data.asin).toUpperCase()!==asin))return null;
+    if(data.currency&&data.currency!=='BRL')return null;
+    parsed=chooseProduct(data,store,'amazon_catalog');
+  }else{
+    const contentType=response.headers.get('content-type')||'';
+    if(!contentType.toLowerCase().includes('html'))return null;
+    let html;try{html=await limitedHtml(response)}catch{return null}
+    const found=extract(html,input,store);
+    parsed=chooseProduct(found,store,'shopee_browser');
+  }
+  if(parsed&&parsed.title){
+    if(parsed.partial)parsed.warning=!parsed.price?'Nome e foto identificados, mas o preço atual não foi disponibilizado pela loja.':'Produto identificado parcialmente; confira os campos antes de publicar.';
+    cacheSet(input,parsed);
+  }
+  return parsed;
+}
+
 async function enhancedScan(input){
   const url=new URL(input);
   if(!isAllowed(url))throw Error('Domínio não permitido. Use um link da Shopee, Amazon, Mercado Livre ou Magalu.');
   const store=shopOf(url.hostname);
-  let result=null;
-  try{result=await scan(input)}catch(e){result={store,partial:true,title:'',image:'',price:null,oldPrice:null,warning:e?.message||'Falha ao consultar a loja'};}
+  const special=await specialisedScrape(input,store);
+  if(special?.title&&special?.image&&special?.price)return special;
+  let result=special||null;
+  if(!result){try{result=await scan(input)}catch(e){result={store,partial:true,title:'',image:'',price:null,oldPrice:null,warning:e?.message||'Falha ao consultar a loja'};}}
   if(result?.title&&!cleanTitle(result.title,store))result.title='';if(result?.image&&isGenericImage(result.image))result.image='';if(result?.title&&result?.image&&result?.price)return result;
   for(const provider of [microlinkPreview,readerPreview]){
     if(result?.title&&result?.image)break;
@@ -233,6 +292,7 @@ async function enhancedScan(input){
 module.exports=async function handler(req,res){
   res.setHeader('Cache-Control','no-store');
   if(req.method!=='GET')return res.status(405).json({error:'Método não permitido'});
+  if(!require('../lib/drika').authorised(req))return res.status(401).json({error:'Entre no painel para buscar os produtos.'});
   try{
     const url=req.query.url;
     if(typeof url!=='string'||url.length>2500)return res.status(422).json({error:'Cole um link válido de produto'});
@@ -243,4 +303,4 @@ module.exports=async function handler(req,res){
     return res.status(422).json({error:message});
   }
 };
-module.exports._test={isAllowed,shopOf,extract,priceNumber,meta,cleanTitle,cleanPreview};
+module.exports._test={isAllowed,shopOf,extract,priceNumber,meta,cleanTitle,cleanPreview,chooseProduct};
