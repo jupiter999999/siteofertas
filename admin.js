@@ -20,3 +20,42 @@ $('cancelEdit').onclick=reset;
 $('fetch').onclick=async()=>{const link=val('url');if(!link.startsWith('https://'))return note('Cole um link HTTPS do produto.');$('fetch').disabled=true;note('Lendo informações do produto...');try{const d=await api('/api/product?url='+encodeURIComponent(link)+'&ts='+Date.now());if(d.title)$('name').value=d.title;else $('name').value='';if(d.image)$('image').value=d.image;else $('image').value='';if(d.store)$('shop').value=d.store;const titlePrice=String(d.title||'').match(/R[$]\\s*([\\d.,]+)/i);const price=Number(d.price)||(titlePrice?num(titlePrice[1]):0);$('price').value=price?fmt(price):'';$('old').value=d.oldPrice?fmt(d.oldPrice):'';preview();if(d.warning){note(d.warning+(price?' Preço encontrado: '+money(price)+'. Confira na loja.':''))}else if(price){note(d.priceSource==='product_title'?'Preço extraído do título: '+money(price)+'. Confirme na loja antes de publicar.':'Dados importados. Confira as informações e publique.')}else{const found=[d.title?'nome':null,d.image?'foto':null].filter(Boolean);note(found.length?'Encontrei '+found.join(' e ')+', mas não o preço. Confira o anúncio e informe o valor atual.':'A loja não disponibilizou os dados automaticamente. Abra o anúncio e preencha os campos.')}}catch(err){note('Não foi possível importar todos os dados: '+err.message+'. Você pode preencher manualmente.')}finally{$('fetch').disabled=false}};
 $('save').onclick=async()=>{const data={id:editing,url:val('url'),name:val('name'),image:val('image'),shop:val('shop'),old:num(val('old')),price:num(val('price'))};if(!data.url.startsWith('https://')||!data.name||!data.price)return note('Preencha link, nome e valor atual.');if(!storage)return note('O armazenamento ainda não está conectado ao projeto Vercel. É necessário conectá-lo antes de publicar.');$('save').disabled=true;note(editing?'Atualizando produto...':'Publicando para todos os visitantes...');try{const result=await api('/api/offers',{method:editing?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});await load();reset();note(result.updated?'Oferta atualizada no site!':'Oferta publicada no site!');document.getElementById('offers').scrollIntoView({behavior:'smooth',block:'center'})}catch(err){note('Não foi possível publicar: '+err.message)}finally{$('save').disabled=false}};
 preview();state();
+
+/* Upload direto de imagem: fallback quando Amazon e Shopee bloqueiam a prévia automática. */
+function optimizePhoto(file){
+ return new Promise((resolve,reject)=>{
+   if(!/^image\/(png|jpeg|webp)$/.test(file.type))return reject(Error('Envie uma imagem JPG, PNG ou WEBP.'));
+   const objectUrl=URL.createObjectURL(file);
+   const img=new Image();
+   img.onload=()=>{
+     URL.revokeObjectURL(objectUrl);
+     try{
+       const ratio=Math.min(1,1400/Math.max(img.naturalWidth,img.naturalHeight));
+       const canvas=document.createElement('canvas');
+       canvas.width=Math.max(1,Math.round(img.naturalWidth*ratio));
+       canvas.height=Math.max(1,Math.round(img.naturalHeight*ratio));
+       const ctx=canvas.getContext('2d');
+       ctx.fillStyle='#ffffff';ctx.fillRect(0,0,canvas.width,canvas.height);
+       ctx.drawImage(img,0,0,canvas.width,canvas.height);
+       let quality=.84,data=canvas.toDataURL('image/jpeg',quality);
+       while(data.length>2600000&&quality>.3){quality-=.12;data=canvas.toDataURL('image/jpeg',quality)}
+       if(data.length>2600000)throw Error('Foto muito grande. Escolha outra imagem.');
+       resolve(data);
+     }catch(e){reject(e)}
+   };
+   img.onerror=()=>{URL.revokeObjectURL(objectUrl);reject(Error('Não foi possível abrir a foto.'))};
+   img.src=objectUrl;
+ });
+}
+$('uploadImage').addEventListener('change',async e=>{
+  const file=e.target.files?.[0];if(!file)return;
+  $('uploadImage').disabled=true;$('uploadStatus').textContent='Otimizando e enviando a foto...';
+  try{
+    const data=await optimizePhoto(file);
+    const result=await api('/api/upload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data})});
+    $('image').value=result.url;preview();
+    $('uploadStatus').textContent='✓ Foto enviada e pronta para publicar.';
+    note('Foto carregada com sucesso. Complete o nome e o valor do produto.');
+  }catch(err){$('uploadStatus').textContent='Não foi possível enviar: '+err.message}
+  finally{$('uploadImage').disabled=false;e.target.value=''}
+});
