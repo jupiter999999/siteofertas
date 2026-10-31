@@ -1,8 +1,14 @@
 {
   "name": "siteofertas",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
-    "@vercel/blob": "^2.0.0"
+    "@vercel/blob": "^2.0.0",
+    "@sparticuz/chromium": "141.0.0",
+    "playwright-core": "1.56.1",
+    "cheerio": "1.0.0"
   }
 }
