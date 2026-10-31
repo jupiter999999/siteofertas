@@ -84,10 +84,10 @@ $('fetch').onclick=async()=>{
    if(foundName&&foundPhoto&&foundPrice)note('Dados encontrados. Confirme o preço e publique a oferta.');
    else if(foundName&&foundPrice)note('Nome e preço encontrados. A foto não foi liberada: envie uma imagem do produto abaixo.');
    else if(foundName)note('Nome encontrado. A loja não disponibilizou foto ou preço; confira o anúncio e complete antes de publicar.');
-   else note('A loja bloqueou a leitura. Cole a mensagem completa de compartilhamento (como a do WhatsApp) para preencher nome e preço; você também pode enviar a foto.');
+   else note(d.warning||'Não foi possível identificar o produto automaticamente. Nenhum dado incorreto será publicado.');
  }catch(err){
    if(shared.title||shared.price)note('A loja bloqueou a consulta, mas aproveitei os dados da mensagem. Confira e envie uma foto, se necessário.');
-   else note('A loja não liberou os dados: '+err.message+'. Cole a mensagem completa de compartilhamento para identificar nome e preço.');
+   else note('Não foi possível consultar este produto: '+err.message);
  }finally{$('fetch').disabled=false}
 };
 $('save').onclick=async()=>{const data={id:editing,url:extractLink(val('url')),name:val('name'),image:val('image'),shop:val('shop'),old:num(val('old')),price:num(val('price'))};if(!data.url.startsWith('https://')||!data.name||!data.price)return note('Preencha link, nome e valor atual.');if(!storage)return note('O armazenamento ainda não está conectado ao projeto Vercel. É necessário conectá-lo antes de publicar.');$('save').disabled=true;note(editing?'Atualizando produto...':'Publicando para todos os visitantes...');try{const result=await api('/api/offers',{method:editing?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});await load();reset();note(result.updated?'Oferta atualizada no site!':'Oferta publicada no site!');document.getElementById('offers').scrollIntoView({behavior:'smooth',block:'center'})}catch(err){note('Não foi possível publicar: '+err.message)}finally{$('save').disabled=false}};
