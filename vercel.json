@@ -1,1 +1,17 @@
-{"rewrites":[{"source":"/admin","destination":"/admin.html"},{"source":"/assets/drika-premium.webp","destination":"https://promocoes-da-drika.vercel.app/drika.webp"}]}
+{
+  "rewrites": [
+    {
+      "source": "/admin",
+      "destination": "/admin.html"
+    },
+    {
+      "source": "/assets/drika-premium.webp",
+      "destination": "https://promocoes-da-drika.vercel.app/drika.webp"
+    }
+  ],
+  "functions": {
+    "api/product.js": {
+      "maxDuration": 40
+    }
+  }
+}
