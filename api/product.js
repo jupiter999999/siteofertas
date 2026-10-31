@@ -225,6 +225,8 @@ async function specialisedScrape(input,store){
     if(!asin)return null;
     api.searchParams.set('asin',asin);api.searchParams.set('geocode','br');
   }else if(store==='Shopee'){
+    /* Shopee custa 100 créditos/consulta; exigir liberação explícita no servidor. */
+    if(process.env.SCRAPEDO_SHOPEE_ENABLED!=='true')return null;
     api.searchParams.set('url',input);api.searchParams.set('render','true');
     api.searchParams.set('geoCode','br');api.searchParams.set('customWait','1200');
     api.searchParams.set('timeout','14000');api.searchParams.set('disableRetry','true');
