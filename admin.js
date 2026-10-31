@@ -55,6 +55,37 @@ function isRealProductImage(v){
  if(/(?:homepage|\/logo|\/icons?\/|favicon|\/shopee-mobilemall|banner[_/-]|default-logo|\/brand|shopee.*homepage)/i.test(u.pathname))return false;
  return true;
 }
+
+/* Leitor opcional pelo Chrome real: usa a sessão já conectada à Shopee do computador,
+   sem transferir senhas/cookies nem instalar scraping pago. */
+function chromeReaderInstalled(){
+  return document.documentElement.dataset.drinkaChromeReader==='ativo';
+}
+function lookupFromChrome(url){
+  return new Promise((resolve,reject)=>{
+    if(!chromeReaderInstalled())return reject(Error('Extensão Leitor Drinka não encontrada.'));
+    const id='drinka-'+Date.now()+'-'+Math.random().toString(36).slice(2);
+    const finish=(event)=>{
+      if(event.source!==window||event.origin!==location.origin||event.data?.type!=='DRINKA_LOCAL_READER_RESULT'||event.data.id!==id)return;
+      clearTimeout(timer);
+      window.removeEventListener('message',finish);
+      const d=event.data.result||{};
+      if(d.erro)return reject(Error(d.erro));
+      resolve({
+        store:'Shopee',title:d.nome||'',image:d.imagem||'',
+        price:d.preco||null,oldPrice:d.preco_anterior||null,
+        source:'chrome_conectado',warning:d.aviso||''
+      });
+    };
+    const timer=setTimeout(()=>{
+      window.removeEventListener('message',finish);
+      reject(Error('O leitor local não respondeu. Confirme se a extensão está habilitada no Chrome.'));
+    },22500);
+    window.addEventListener('message',finish);
+    window.postMessage({type:'DRINKA_LOCAL_READER_REQUEST',id,url},location.origin);
+  });
+}
+
 $('fetch').onclick=async()=>{
  const raw=val('url'),shared=readSharedMessage(raw),link=shared.link;
  if(!link.startsWith('https://'))return note('Cole o link ou a mensagem compartilhada que contém o link HTTPS.');
@@ -70,7 +101,7 @@ $('fetch').onclick=async()=>{
  preview();
  note(shared.title||shared.price?'Identifiquei informações na mensagem. Verificando a foto e outros detalhes...':'Consultando o produto. Algumas lojas bloqueiam o acesso automático.');
  try{
-   const d=await api('/api/product?url='+encodeURIComponent(link)+'&ts='+Date.now());
+   const d=($('shop').value==='Shopee'&&chromeReaderInstalled())?await lookupFromChrome(link):await api('/api/product?url='+encodeURIComponent(link)+'&ts='+Date.now());
    if(d.store)$('shop').value=d.store;
    const validTitle=isRealProductTitle(d.title);
    const validImage=isRealProductImage(d.image);
@@ -87,7 +118,7 @@ $('fetch').onclick=async()=>{
    else note(d.warning||'Não foi possível identificar o produto automaticamente. Nenhum dado incorreto será publicado.');
  }catch(err){
    if(shared.title||shared.price)note('A loja bloqueou a consulta, mas aproveitei os dados da mensagem. Confira e envie uma foto, se necessário.');
-   else note('Não foi possível consultar este produto: '+err.message);
+   else note('Não foi possível ler o anúncio: '+err.message+($('shop').value==='Shopee'&&!chromeReaderInstalled()?' Para tentar pelo seu Chrome conectado, instale o Leitor Drinka neste computador.':''));
  }finally{$('fetch').disabled=false}
 };
 $('save').onclick=async()=>{const data={id:editing,url:extractLink(val('url')),name:val('name'),image:val('image'),shop:val('shop'),old:num(val('old')),price:num(val('price'))};if(!data.url.startsWith('https://')||!data.name||!data.price)return note('Preencha link, nome e valor atual.');if(!storage)return note('O armazenamento ainda não está conectado ao projeto Vercel. É necessário conectá-lo antes de publicar.');$('save').disabled=true;note(editing?'Atualizando produto...':'Publicando para todos os visitantes...');try{const result=await api('/api/offers',{method:editing?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});await load();reset();note(result.updated?'Oferta atualizada no site!':'Oferta publicada no site!');document.getElementById('offers').scrollIntoView({behavior:'smooth',block:'center'})}catch(err){note('Não foi possível publicar: '+err.message)}finally{$('save').disabled=false}};
