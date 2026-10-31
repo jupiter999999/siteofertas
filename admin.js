@@ -91,6 +91,22 @@ $('fetch').onclick=async()=>{
  }finally{$('fetch').disabled=false}
 };
 $('save').onclick=async()=>{const data={id:editing,url:extractLink(val('url')),name:val('name'),image:val('image'),shop:val('shop'),old:num(val('old')),price:num(val('price'))};if(!data.url.startsWith('https://')||!data.name||!data.price)return note('Preencha link, nome e valor atual.');if(!storage)return note('O armazenamento ainda não está conectado ao projeto Vercel. É necessário conectá-lo antes de publicar.');$('save').disabled=true;note(editing?'Atualizando produto...':'Publicando para todos os visitantes...');try{const result=await api('/api/offers',{method:editing?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});await load();reset();note(result.updated?'Oferta atualizada no site!':'Oferta publicada no site!');document.getElementById('offers').scrollIntoView({behavior:'smooth',block:'center'})}catch(err){note('Não foi possível publicar: '+err.message)}finally{$('save').disabled=false}};
+
+/* A pessoa só cola o link: a consulta começa automaticamente após a colagem. */
+let autoLookupTimer=null,autoLookupLast='';
+$('url').addEventListener('input',()=>{
+  clearTimeout(autoLookupTimer);
+  if(editing)return;
+  const link=extractLink(val('url'));
+  if(!link||link===autoLookupLast)return;
+  autoLookupTimer=setTimeout(()=>{
+    if(editing||$('fetch').disabled||!$('dashboard')||$('dashboard').style.display==='none')return;
+    if(extractLink(val('url'))!==link)return;
+    autoLookupLast=link;
+    $('fetch').click();
+  },750);
+});
+
 preview();state();
 
 /* Upload direto de imagem: fallback quando Amazon e Shopee bloqueiam a prévia automática. */
