@@ -11,7 +11,8 @@
   ],
   "functions": {
     "api/product.js": {
-      "maxDuration": 40
+      "maxDuration": 50,
+      "includeFiles": "node_modules/@sparticuz/chromium/bin/**"
     }
   }
 }
