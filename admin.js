@@ -38,8 +38,8 @@ function readSharedMessage(raw){
     .replace(/[!.,:\s]+$/,'').trim();
  }
  if(title.length<8||title.length>175||/^(?:https?:|www\.|shopee|amazon)/i.test(title))title='';
- const current=num(oldPrice?.[2]||advertised?.[1]||shopee?.[2]||'');
- const previous=num(oldPrice?.[1]||'');
+ const current=num(String(oldPrice?.[2]||advertised?.[1]||shopee?.[2]||'').replace(/[.,]+$/,''));
+ const previous=num(String(oldPrice?.[1]||'').replace(/[.,]+$/,''));
  return {link,title,price:current||null,oldPrice:previous>current?previous:null};
 }
 function isRealProductTitle(v){
