@@ -97,7 +97,7 @@ $('fetch').onclick=async()=>{
  if(/shopee/i.test(link))$('shop').value='Shopee';
  else if(/amazon|amzn|a\.co/i.test(link))$('shop').value='Amazon';
  else if(/meli|mercado/i.test(link))$('shop').value='Mercado Livre';
- else if(/magalu|magazineluiza/i.test(link))$('shop').value='Magalu';
+ else if(/magalu|magazineluiza|magazinevoce/i.test(link))$('shop').value='Magalu';
  preview();
  note(shared.title||shared.price?'Identifiquei informações na mensagem. Verificando a foto e outros detalhes...':'Consultando o produto. Algumas lojas bloqueiam o acesso automático.');
  try{
@@ -112,9 +112,9 @@ $('fetch').onclick=async()=>{
    if(d.oldPrice)$('old').value=fmt(d.oldPrice);
    preview();
    const foundName=Boolean(val('name')),foundPhoto=Boolean(val('image')),foundPrice=num(val('price'))>0;
-   if(foundName&&foundPhoto&&foundPrice)note('Dados encontrados. Confirme o preço e publique a oferta.');
+   if(foundName&&foundPhoto&&foundPrice)note(d.warning||'Dados encontrados. Confirme o preço e publique a oferta.');
    else if(foundName&&foundPrice)note('Nome e preço encontrados, mas falta a foto.');
-   else if(foundName&&foundPhoto)note('Nome e foto encontrados. Ainda falta o preço: atualize a extensão Leitor Drinka no Chrome e busque novamente.');
+   else if(foundName&&foundPhoto)note($('shop').value==='Shopee'&&chromeReaderInstalled()?'Nome e foto encontrados. Se o preço não apareceu, atualize a extensão Leitor Drinka e tente novamente.':'Nome e foto encontrados, mas o preço não foi identificado.');
    else if(foundName)note('Nome encontrado. Foto e preço ainda não foram identificados.');
    else note(d.warning||'Não foi possível identificar o produto automaticamente. Nenhum dado incorreto será publicado.');
  }catch(err){
