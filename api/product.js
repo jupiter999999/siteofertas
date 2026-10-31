@@ -284,7 +284,7 @@ async function enhancedScan(input){
   if(result.image&&isGenericImage(result.image))result.image='';
   result.partial=!(result.title&&result.image&&result.price);
   if(result.partial){
-    if(!result.title&&!result.image)result.warning='A Shopee ou Amazon não liberou a prévia para importação. Você ainda pode cadastrar o produto manualmente e enviar uma foto.';
+    if(!result.title&&!result.image)result.warning=store==='Shopee'?'Importação automática da Shopee indisponível: o serviço Scrape.do exige autorização especial para ler essa loja. Não é erro do seu link.':'Não foi possível obter os dados desse anúncio agora. Tente novamente ou confira o produto na loja.';
     else if(!result.price)result.warning='Encontrei dados do produto, mas a loja não liberou o preço atual. Confira na loja antes de publicar.';
     else if(!result.image)result.warning='Encontrei o produto, mas não sua foto. Envie uma imagem manualmente.';
   }
