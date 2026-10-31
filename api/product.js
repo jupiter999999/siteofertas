@@ -151,17 +151,93 @@ async function scan(input){
     return result;
   }finally{clearTimeout(timeout)}
 }
+
+/* Fallback: a third-party public link-preview service may read metadata when a marketplace returns a challenge page.
+   Prices are intentionally not guessed from snippets or unrelated products. */
+function cleanTitle(t,store){
+  const s=decode(t).replace(/\s+/g,' ').trim().slice(0,190);
+  if(!s||s.length<12)return '';
+  if(/^(shopee|shopee brasil|amazon(?:\.com(?:\.br)?)?|mercado livre|magalu|just a moment|access denied|captcha|robot check|página não encontrada|acesso negado|verifique se você é humano|login|sign in|please enable javascript)\s*[.!–-]?$/i.test(s))return '';
+  if(/enable javascript|please wait|automated access|access denied|verify you are human|captcha|cloudflare|não foi possível|página não encontrada/i.test(s))return '';
+  return s;
+}
+function cleanPreview(input,store){
+  if(!input||typeof input!=='object')return null;
+  const title=cleanTitle(input.title,store);
+  let image=imageUrl(input.image);
+  try{if(!image||!image.startsWith('https://'))image='';else image=new URL(image).href}catch{image=''}
+  if(!title&&!image)return null;
+  const price=priceNumber(input.price);
+  const oldPrice=priceNumber(input.oldPrice);
+  return {store,title,image,price:price||null,oldPrice:oldPrice&&price&&oldPrice>price?oldPrice:null,priceSource:price?'product_metadata':null,partial:!title||!image||!price};
+}
+async function microlinkPreview(input,store){
+  const u=new URL('https://api.microlink.io/');
+  u.searchParams.set('url',input);
+  const res=await fetch(u.href,{headers:{accept:'application/json'},signal:AbortSignal.timeout(5500)});
+  if(!res.ok)return null;
+  const json=await res.json();
+  if(json.status!=='success'||!json.data)return null;
+  const d=json.data;
+  const result=cleanPreview({title:d.title||d.description,image:d.image?.url||d.image,price:d.price,oldPrice:d.originalPrice},store);
+  return result?{...result,source:'link_preview'}:null;
+}
+async function readerPreview(input,store){
+  const u='https://r.jina.ai/'+input;
+  const res=await fetch(u,{signal:AbortSignal.timeout(4500),headers:{accept:'text/plain'}});
+  if(!res.ok)return null;
+  const body=(await res.text()).slice(0,180000);
+  const t=(body.match(/^Title:\s*(.+)$/mi)||[])[1]||'';
+  const title=cleanTitle(t,store);
+  if(!title)return null;
+  const images=[...body.matchAll(/!\[[^\]]*\]\((https:\/\/[^)\s]+)\)/g)].map(x=>x[1]);
+  const image=images.find(x=>/shopee|amazon|media-amazon|mlstatic|m\.media|magalu/i.test(x))||'';
+  const result=cleanPreview({title,image},store);
+  return result?{...result,source:'reader_preview'}:null;
+}
+async function enhancedScan(input){
+  const url=new URL(input);
+  if(!isAllowed(url))throw Error('Domínio não permitido. Use um link da Shopee, Amazon, Mercado Livre ou Magalu.');
+  const store=shopOf(url.hostname);
+  let result=null;
+  try{result=await scan(input)}catch(e){result={store,partial:true,title:'',image:'',price:null,oldPrice:null,warning:e?.message||'Falha ao consultar a loja'};}
+  if(result?.title&&result?.image&&result?.price)return result;
+  for(const provider of [microlinkPreview,readerPreview]){
+    if(result?.title&&result?.image)break;
+    try{
+      const alt=await provider(input,store);
+      if(!alt)continue;
+      result={...result,store,
+        title:result?.title||alt.title||'',
+        image:result?.image||alt.image||'',
+        price:result?.price||alt.price||null,
+        oldPrice:result?.oldPrice||alt.oldPrice||null,
+        priceSource:result?.priceSource||alt.priceSource||null,
+        source:alt.source};
+      if(result.title||result.image)result.warning='';
+    }catch{}
+  }
+  if(!result)result={store,title:'',image:'',price:null,oldPrice:null};
+  result.partial=!(result.title&&result.image&&result.price);
+  if(result.partial){
+    if(!result.title&&!result.image)result.warning='A Shopee ou Amazon não liberou a prévia para importação. Você ainda pode cadastrar o produto manualmente e enviar uma foto.';
+    else if(!result.price)result.warning='Encontrei dados do produto, mas a loja não liberou o preço atual. Confira na loja antes de publicar.';
+    else if(!result.image)result.warning='Encontrei o produto, mas não sua foto. Envie uma imagem manualmente.';
+  }
+  return result;
+}
+
 module.exports=async function handler(req,res){
   res.setHeader('Cache-Control','no-store');
   if(req.method!=='GET')return res.status(405).json({error:'Método não permitido'});
   try{
     const url=req.query.url;
     if(typeof url!=='string'||url.length>2500)return res.status(422).json({error:'Cole um link válido de produto'});
-    const result=await scan(url);
+    const result=await enhancedScan(url);
     return res.status(200).json(result);
   }catch(e){
     const message=e?.name==='AbortError'?'A loja demorou a responder. Tente novamente.':e?.message||'Não foi possível consultar o anúncio';
     return res.status(422).json({error:message});
   }
 };
-module.exports._test={isAllowed,shopOf,extract,priceNumber,meta};
+module.exports._test={isAllowed,shopOf,extract,priceNumber,meta,cleanTitle,cleanPreview};
