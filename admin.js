@@ -17,8 +17,80 @@ $('loginForm').onsubmit=async e=>{e.preventDefault();try{await api('/api/session
 $('logout').onclick=async e=>{e.preventDefault();await api('/api/session',{method:'DELETE'});reset();await state()};
 ['name','image','shop','old','price'].forEach(k=>$(k).addEventListener('input',preview));
 $('cancelEdit').onclick=reset;
-$('fetch').onclick=async()=>{const link=val('url');if(!link.startsWith('https://'))return note('Cole um link HTTPS do produto.');$('fetch').disabled=true;note('Lendo informações do produto...');try{const d=await api('/api/product?url='+encodeURIComponent(link)+'&ts='+Date.now());if(d.title)$('name').value=d.title;else $('name').value='';if(d.image)$('image').value=d.image;else $('image').value='';if(d.store)$('shop').value=d.store;const titlePrice=String(d.title||'').match(/R[$]\\s*([\\d.,]+)/i);const price=Number(d.price)||(titlePrice?num(titlePrice[1]):0);$('price').value=price?fmt(price):'';$('old').value=d.oldPrice?fmt(d.oldPrice):'';preview();if(d.warning){note(d.warning+(price?' Preço encontrado: '+money(price)+'. Confira na loja.':''))}else if(price){note(d.priceSource==='product_title'?'Preço extraído do título: '+money(price)+'. Confirme na loja antes de publicar.':'Dados importados. Confira as informações e publique.')}else{const found=[d.title?'nome':null,d.image?'foto':null].filter(Boolean);note(found.length?'Encontrei '+found.join(' e ')+', mas não o preço. Confira o anúncio e informe o valor atual.':'A loja não disponibilizou os dados automaticamente. Abra o anúncio e preencha os campos.')}}catch(err){note('Não foi possível importar todos os dados: '+err.message+'. Você pode preencher manualmente.')}finally{$('fetch').disabled=false}};
-$('save').onclick=async()=>{const data={id:editing,url:val('url'),name:val('name'),image:val('image'),shop:val('shop'),old:num(val('old')),price:num(val('price'))};if(!data.url.startsWith('https://')||!data.name||!data.price)return note('Preencha link, nome e valor atual.');if(!storage)return note('O armazenamento ainda não está conectado ao projeto Vercel. É necessário conectá-lo antes de publicar.');$('save').disabled=true;note(editing?'Atualizando produto...':'Publicando para todos os visitantes...');try{const result=await api('/api/offers',{method:editing?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});await load();reset();note(result.updated?'Oferta atualizada no site!':'Oferta publicada no site!');document.getElementById('offers').scrollIntoView({behavior:'smooth',block:'center'})}catch(err){note('Não foi possível publicar: '+err.message)}finally{$('save').disabled=false}};
+
+/* Captura a URL original da mensagem, preservando rastreamento de afiliados. */
+function extractLink(raw){
+ const match=String(raw||'').match(/https:\/\/[^\s<>"'\u200b]+/i);
+ return match?match[0].replace(/[.,;!?]+$/,'').replace(/\)+$/,''):'';
+}
+function readSharedMessage(raw){
+ const original=String(raw||'').trim();
+ const link=extractLink(original);
+ const body=original.replace(link,'').replace(/https?:\/\/\S+/g,'').replace(/\s+/g,' ').trim();
+ if(!link||body.length<15)return {link};
+ const shopee=body.match(/(?:D[eê]\s+uma\s+olhada\s+em|D[aá]\s+uma\s+olhada\s+em)\s+(.+?)\s+por\s+R\$\s*([\d.,]+)/i);
+ const advertised=body.match(/(?:por|apenas|agora|preço(?: de)?)\s*:?\s*R\$\s*([\d.,]+)/i);
+ const oldPrice=body.match(/(?:de|antes|era)\s+R\$\s*([\d.,]+)\s+(?:por|agora|hoje)\s+R\$\s*([\d.,]+)/i);
+ let title=shopee?.[1]||'';
+ if(!title){
+   title=body.replace(/(?:^|\s)(?:D[eê]\s+uma\s+olhada\s+em|Confira(?:\s+esse)?|Olha\s+(?:s[oó]\s+)?(?:esse|essa)|Compre)\s*/i,'')
+    .split(/\b(?:por|apenas|agora|compre\s+(?:na|no)\s+(?:shopee|amazon)|https?:\/\/)\b/i)[0]
+    .replace(/[!.,:\s]+$/,'').trim();
+ }
+ if(title.length<8||title.length>175||/^(?:https?:|www\.|shopee|amazon)/i.test(title))title='';
+ const current=num(oldPrice?.[2]||advertised?.[1]||shopee?.[2]||'');
+ const previous=num(oldPrice?.[1]||'');
+ return {link,title,price:current||null,oldPrice:previous>current?previous:null};
+}
+function isRealProductTitle(v){
+ const t=String(v||'').trim();
+ if(t.length<10)return false;
+ if(/^(?:shopee|amazon|mercado livre|magalu)(?:\s*(?:brasil|\.com\.br))?\s*[|:-]/i.test(t))return false;
+ if(/ofertas incr[ií]veis|melhores pre[çc]os do mercado|compre e venda online|p[aá]gina inicial|loja oficial|homepage|access denied|robot check/i.test(t))return false;
+ return true;
+}
+function isRealProductImage(v){
+ let u;try{u=new URL(String(v||''))}catch{return false}
+ if(u.protocol!=='https:')return false;
+ if(/(?:homepage|\/logo|\/icons?\/|favicon|\/shopee-mobilemall|banner[_/-]|default-logo|\/brand|shopee.*homepage)/i.test(u.pathname))return false;
+ return true;
+}
+$('fetch').onclick=async()=>{
+ const raw=val('url'),shared=readSharedMessage(raw),link=shared.link;
+ if(!link.startsWith('https://'))return note('Cole o link ou a mensagem compartilhada que contém o link HTTPS.');
+ $('fetch').disabled=true;
+ $('name').value=shared.title||'';
+ $('image').value='';
+ $('price').value=shared.price?fmt(shared.price):'';
+ $('old').value=shared.oldPrice?fmt(shared.oldPrice):'';
+ if(/shopee/i.test(link))$('shop').value='Shopee';
+ else if(/amazon|amzn|a\.co/i.test(link))$('shop').value='Amazon';
+ else if(/meli|mercado/i.test(link))$('shop').value='Mercado Livre';
+ else if(/magalu|magazineluiza/i.test(link))$('shop').value='Magalu';
+ preview();
+ note(shared.title||shared.price?'Identifiquei informações na mensagem. Verificando a foto e outros detalhes...':'Consultando o produto. Algumas lojas bloqueiam o acesso automático.');
+ try{
+   const d=await api('/api/product?url='+encodeURIComponent(link)+'&ts='+Date.now());
+   if(d.store)$('shop').value=d.store;
+   const validTitle=isRealProductTitle(d.title);
+   const validImage=isRealProductImage(d.image);
+   if(validTitle&&!shared.title)$('name').value=d.title;
+   if(validImage)$('image').value=d.image;
+   let price=Number(d.price)||shared.price||0;
+   if(price)$('price').value=fmt(price);
+   if(d.oldPrice)$('old').value=fmt(d.oldPrice);
+   preview();
+   const foundName=Boolean(val('name')),foundPhoto=Boolean(val('image')),foundPrice=num(val('price'))>0;
+   if(foundName&&foundPhoto&&foundPrice)note('Dados encontrados. Confirme o preço e publique a oferta.');
+   else if(foundName&&foundPrice)note('Nome e preço encontrados. A foto não foi liberada: envie uma imagem do produto abaixo.');
+   else if(foundName)note('Nome encontrado. A loja não disponibilizou foto ou preço; confira o anúncio e complete antes de publicar.');
+   else note('A loja bloqueou a leitura. Cole a mensagem completa de compartilhamento (como a do WhatsApp) para preencher nome e preço; você também pode enviar a foto.');
+ }catch(err){
+   if(shared.title||shared.price)note('A loja bloqueou a consulta, mas aproveitei os dados da mensagem. Confira e envie uma foto, se necessário.');
+   else note('A loja não liberou os dados: '+err.message+'. Cole a mensagem completa de compartilhamento para identificar nome e preço.');
+ }finally{$('fetch').disabled=false}
+};
+$('save').onclick=async()=>{const data={id:editing,url:extractLink(val('url')),name:val('name'),image:val('image'),shop:val('shop'),old:num(val('old')),price:num(val('price'))};if(!data.url.startsWith('https://')||!data.name||!data.price)return note('Preencha link, nome e valor atual.');if(!storage)return note('O armazenamento ainda não está conectado ao projeto Vercel. É necessário conectá-lo antes de publicar.');$('save').disabled=true;note(editing?'Atualizando produto...':'Publicando para todos os visitantes...');try{const result=await api('/api/offers',{method:editing?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});await load();reset();note(result.updated?'Oferta atualizada no site!':'Oferta publicada no site!');document.getElementById('offers').scrollIntoView({behavior:'smooth',block:'center'})}catch(err){note('Não foi possível publicar: '+err.message)}finally{$('save').disabled=false}};
 preview();state();
 
 /* Upload direto de imagem: fallback quando Amazon e Shopee bloqueiam a prévia automática. */
