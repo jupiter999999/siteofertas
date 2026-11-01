@@ -834,3 +834,19 @@ img{max-width:100%}
   .promo-mobile-actions a{font-size:11px}
   .store-list .store-logo img{max-width:min(100%,110px)}
 }
+
+
+/* Mobile: enquadramento da fotografia corrigido (rosto e lojas visíveis). */
+@media(max-width:760px){
+  .promo-banner-mobile .promo-mobile-media{
+    height:clamp(205px,57vw,290px);
+    background-size:auto 122%!important;
+    background-position:right 35%!important;
+  }
+}
+@media(max-width:390px){
+  .promo-banner-mobile .promo-mobile-media{
+    background-size:auto 116%!important;
+    background-position:right center!important;
+  }
+}
