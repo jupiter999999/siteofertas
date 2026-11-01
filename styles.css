@@ -790,3 +790,47 @@ body{
 @media(min-width:761px) and (max-width:1100px){
   .promo-hero-shell.shell{width:calc(100% - 28px)!important}
 }
+
+
+/* Correção responsiva — Drinka Economiza: telas pequenas sem rolagem lateral. */
+html,body{max-width:100%;overflow-x:clip}
+main,main>section,.nav,.foot-inner{min-width:0}
+img{max-width:100%}
+@media(max-width:760px){
+  html,body{width:100%;max-width:100%;overflow-x:hidden}
+  .announcement{padding:10px 12px;font-size:11px;line-height:1.4}
+  .nav.shell{width:100%;min-width:0;max-width:100%;padding:13px 16px!important;min-height:64px;gap:8px}
+  .nav .logo{min-width:0;max-width:100%;white-space:normal;font-size:clamp(14px,4.4vw,18px);line-height:1.15}
+  .nav .logo-mark{font-size:20px;margin-right:2px}
+  .nav nav{display:none}
+  .shell:not(.promo-hero-shell){max-width:100%;padding-left:16px;padding-right:16px}
+  .promo-hero-shell.shell{box-sizing:border-box;width:calc(100% - 24px)!important;max-width:calc(100% - 24px)!important;margin:8px 12px 0!important;overflow:hidden!important}
+  .promo-banner-mobile,.promo-mobile-copy,.promo-mobile-media{min-width:0;max-width:100%}
+  .promo-mobile-media{background-position:right 7%;background-size:auto 172%}
+  .promo-mobile-copy{padding:20px 16px 24px}
+  .promo-mobile-copy h1{font-size:clamp(29px,8.5vw,43px);letter-spacing:-1.2px;overflow-wrap:anywhere}
+  .promo-mobile-copy p{font-size:13px;line-height:1.55}
+  .promo-mobile-actions{max-width:100%;gap:8px}
+  .promo-mobile-actions a{font-size:12px;padding:11px 6px;overflow-wrap:anywhere}
+  .benefits{padding-top:24px!important}
+  .store-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .store-list .store-brand-button{width:100%;min-width:0;min-height:133px;padding:14px 7px 12px}
+  .store-list .store-logo{max-width:100%;height:48px}
+  .store-list .store-logo img{max-width:min(100%,128px);max-height:44px}
+  .shop{padding-top:36px!important;padding-bottom:45px}
+  .section-heading{display:block;min-width:0}
+  .search-wrap{width:100%;min-width:0}
+  .search-wrap input{min-width:0;width:100%}
+  .filters{max-width:100%;overscroll-behavior-x:contain}
+  .product-grid{grid-template-columns:minmax(0,1fr);max-width:440px;margin-left:auto;margin-right:auto}
+  .product-grid .card{width:100%;min-width:0}
+  .feature.drika-about{width:auto;max-width:calc(100% - 32px);margin-left:16px;margin-right:16px;display:flex;flex-direction:column}
+  .feature.drika-about>div:first-child{padding:28px 20px}
+  .drika-about .drika-about-visual{min-width:0}
+  .foot-inner{display:block}
+}
+@media(max-width:370px){
+  .promo-mobile-copy{padding-left:12px;padding-right:12px}
+  .promo-mobile-actions a{font-size:11px}
+  .store-list .store-logo img{max-width:min(100%,110px)}
+}
