@@ -83,14 +83,15 @@ function readSharedMessage(raw){
  if(!link||body.length<15)return {link};
  const shopee=body.match(/(?:D[eê]\s+uma\s+olhada\s+em|D[aá]\s+uma\s+olhada\s+em)\s+(.+?)\s+por\s+R\$\s*([\d.,]+)/i);
  const advertised=body.match(/(?:por|apenas|agora|preço(?: de)?)\s*:?\s*R\$\s*([\d.,]+)/i);
- const oldPrice=body.match(/(?:de|antes|era)\s+R\$\s*([\d.,]+)\s+(?:por|agora|hoje)\s+R\$\s*([\d.,]+)/i);
+ const oldPrice=body.match(/(?:de|antes|era)\s*:?\s*R\$\s*([\d.,]+)\s+(?:por|agora|hoje)\s*:?\s*R\$\s*([\d.,]+)/i);
  let title=shopee?.[1]||'';
  if(!title){
    title=body.replace(/(?:^|\s)(?:D[eê]\s+uma\s+olhada\s+em|Confira(?:\s+esse)?|Olha\s+(?:s[oó]\s+)?(?:esse|essa)|Compre)\s*/i,'')
     .split(/\b(?:por|apenas|agora|compre\s+(?:na|no)\s+(?:shopee|amazon)|https?:\/\/)\b/i)[0]
     .replace(/[!.,:\s]+$/,'').trim();
  }
- if(title.length<8||title.length>175||/^(?:https?:|www\.|shopee|amazon)/i.test(title))title='';
+ title=title.replace(/\s+(?:de|antes|era)\s*:?\s*R\$\s*[\d.,]+.*$/i,'').trim();
+ if(title.length<8||title.length>175||/^(?:https?:|www\.|shopee|amazon|de\s*:?\s*R\$|por\s*:?\s*R\$)/i.test(title))title='';
  const current=num(String(oldPrice?.[2]||advertised?.[1]||shopee?.[2]||'').replace(/[.,]+$/,''));
  const previous=num(String(oldPrice?.[1]||'').replace(/[.,]+$/,''));
  return {link,title,price:current||null,oldPrice:previous>current?previous:null};
