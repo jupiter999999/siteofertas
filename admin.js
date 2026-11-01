@@ -5,6 +5,50 @@ const num=v=>{let s=String(v??'').replace(/[^0-9.,]/g,'');if(!s)return 0;if(s.in
 const money=v=>Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const fmt=v=>Number(v).toFixed(2).replace('.',',');
 let items=[],editing=null,storage=false;
+
+/* Recepção de compartilhamentos pelo app Atalhos no iPhone.
+   Safari iOS não implementa Web Share Target; Shortcut envia ?shared=<texto codificado>.
+   sessionStorage preserva a oferta enquanto a administradora faz login. */
+const DRINKA_SHARE_KEY='drinka:pending-share:v1';
+function incomingShare(){
+ try{
+  const q=new URLSearchParams(location.search);
+  const raw=(q.get('shared')||[q.get('text'),q.get('url')].filter(Boolean).join(' ')).trim().slice(0,4500);
+  if(raw&&extractLink(raw)){
+   sessionStorage.setItem(DRINKA_SHARE_KEY,raw);
+   history.replaceState(history.state,'',location.pathname+location.hash);
+  }
+  return sessionStorage.getItem(DRINKA_SHARE_KEY)||'';
+ }catch{return ''}
+}
+let pendingShare=incomingShare();
+function importShare(raw){
+ const message=String(raw||'').trim();
+ const parsed=readSharedMessage(message);
+ if(!parsed.link||!/^https:\/\//i.test(parsed.link))return false;
+ if(editing){reset()}
+ $('url').value=message.slice(0,4500);
+ if(parsed.title)$('name').value=parsed.title;
+ if(parsed.price)$('price').value=fmt(parsed.price);
+ if(parsed.oldPrice)$('old').value=fmt(parsed.oldPrice);
+ note('Compartilhamento recebido! Buscando nome, foto e preço quando disponíveis...');
+ preview();
+ $('url').dispatchEvent(new Event('input',{bubbles:true}));
+ $('formTitle').scrollIntoView({behavior:'smooth',block:'start'});
+ return true;
+}
+function applyPendingShare(){
+ if(!pendingShare)return;
+ if(importShare(pendingShare)){
+  pendingShare='';
+  try{sessionStorage.removeItem(DRINKA_SHARE_KEY)}catch{}
+ }else{
+  pendingShare='';
+  try{sessionStorage.removeItem(DRINKA_SHARE_KEY)}catch{}
+  note('O conteúdo compartilhado não tem um link HTTPS válido.');
+ }
+}
+
 async function api(path,options={}){const r=await fetch(path,{cache:'no-store',credentials:'same-origin',...options});const raw=await r.text();let data;try{data=JSON.parse(raw)}catch{throw Error('A API respondeu de forma inesperada ('+r.status+'). Atualize o painel e tente novamente')};if(!r.ok)throw Error(data.error||'Falha na solicitação');return data}
 function preview(){const image=val('image');$('previewimg').innerHTML=image.startsWith('https://')?'<img alt="Produto selecionado" src="'+esc(image)+'">':'📦';$('previewshop').textContent=val('shop');$('previewname').textContent=val('name')||'Seu produto aparecerá aqui';const p=num(val('price')),old=num(val('old'));$('previewold').textContent=old>p&&p>0?money(old):'';$('previewprice').textContent=p?money(p):'R$ —';const percent=old>p&&p>0?Math.round((1-p/old)*100):0;$('previewdiscount').textContent=percent?percent+'% de desconto':'';$('discountInfo').textContent=percent?'Economia de '+money(old-p)+' ('+percent+'% OFF)':p?'Preço atual: '+money(p):'Informe o valor atual para publicar'}
 function note(msg){$('message').textContent=msg}
@@ -12,11 +56,20 @@ function reset(){editing=null;['url','name','image','old','price'].forEach(id=>$
 function startEdit(id){const item=items.find(x=>x.id===id);if(!item)return;editing=id;for(const k of ['url','name','image'])$(k).value=item[k]||'';$('shop').value=item.shop;$('old').value=item.old?fmt(item.old):'';$('price').value=fmt(item.price);$('formTitle').textContent='✏️ Editar promoção';$('save').textContent='Salvar alterações';$('cancelEdit').style.display='block';preview();$('formTitle').scrollIntoView({behavior:'smooth',block:'start'})}
 function draw(){const target=$('offers');target.innerHTML=items.length?items.map(item=>'<div class="line"><span><strong>'+esc(item.name)+'</strong><br><small>'+esc(item.shop)+' • '+money(item.price)+'</small></span><div><button class="edit-btn" data-edit="'+esc(item.id)+'">Editar</button><button data-remove="'+esc(item.id)+'">Excluir</button></div></div>').join(''):'Nenhuma oferta publicada ainda.';document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>startEdit(b.dataset.edit));document.querySelectorAll('[data-remove]').forEach(b=>b.onclick=async()=>{if(!confirm('Excluir essa oferta do site público?'))return;try{await api('/api/offers?id='+encodeURIComponent(b.dataset.remove),{method:'DELETE'});await load();note('Oferta excluída do site.')}catch(e){note(e.message)}})}
 async function load(){try{items=(await api('/api/offers?ts='+Date.now())).items;if(!Array.isArray(items))items=[];draw();storage=true;$('status').className='status ok';$('status').textContent='✓ Site sincronizado com o armazenamento. '+items.length+' oferta(s) publicada(s) para todos os visitantes.'}catch(e){storage=false;$('status').className='status error';$('status').textContent='Publicação indisponível: '+e.message}}
-async function state(){try{const s=await api('/api/session');$('loginBox').style.display=s.authenticated?'none':'grid';$('dashboard').style.display=s.authenticated?'grid':'none';if(s.authenticated)await load();else if(!s.configured)$('loginMessage').textContent='Configure ADMIN_PASSWORD na Vercel para entrar.'}catch(e){$('loginMessage').textContent=e.message}}
+async function state(){try{const s=await api('/api/session');$('loginBox').style.display=s.authenticated?'none':'grid';$('dashboard').style.display=s.authenticated?'grid':'none';if(s.authenticated){await load();applyPendingShare()}else if(!s.configured)$('loginMessage').textContent='Configure ADMIN_PASSWORD na Vercel para entrar.'}catch(e){$('loginMessage').textContent=e.message}}
 $('loginForm').onsubmit=async e=>{e.preventDefault();try{await api('/api/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:val('password')})});$('password').value='';$('loginMessage').textContent='';await state()}catch(err){$('loginMessage').textContent=err.message}};
 $('logout').onclick=async e=>{e.preventDefault();await api('/api/session',{method:'DELETE'});reset();await state()};
 ['name','image','shop','old','price'].forEach(k=>$(k).addEventListener('input',preview));
 $('cancelEdit').onclick=reset;
+
+$('pasteShared').onclick=async()=>{
+ let raw='';
+ try{raw=await navigator.clipboard.readText()}catch{}
+ if(!extractLink(raw))raw=prompt('Cole o link copiado da Shopee, Amazon ou Mercado Livre:','')||'';
+ if(!raw)return;
+ if(!importShare(raw))note('O texto copiado não contém um link HTTPS válido.');
+};
+
 
 /* Captura a URL original da mensagem, preservando rastreamento de afiliados. */
 function extractLink(raw){
