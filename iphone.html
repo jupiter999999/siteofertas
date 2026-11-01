@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f6f2eb"><title>Compartilhar pelo iPhone | Drinka Economiza</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f6f2eb;color:#251912;font:16px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{max-width:660px;margin:0 auto;padding:30px 18px 60px}
+h1{font-size:29px;margin:10px 0}h2{font-size:21px}p{line-height:1.55;color:#65574c}
+.card{background:white;border:1px solid #ecdfcf;border-radius:18px;padding:23px;margin-top:22px;box-shadow:0 8px 27px #29160a0a}
+.step{padding:14px 0;border-bottom:1px solid #f2ebe2;line-height:1.55}.step:last-child{border:0}
+.step strong{color:#a45b24}.btn{display:block;text-align:center;background:#eead58;color:#251912;text-decoration:none;font-weight:800;padding:15px;border-radius:12px;margin:18px 0}
+small{display:block;color:#84664f;line-height:1.5}
+code{overflow-wrap:anywhere;background:#fff7eb;padding:3px 5px;border-radius:5px}
+</style></head>
+<body><main>
+<a href="/admin" style="color:#a45b24">← Voltar ao painel ADM</a>
+<h1>📲 Compartilhar ofertas pelo iPhone</h1>
+<p>Configure uma vez o <strong>Atalhos</strong> do iPhone. Depois, na Shopee, toque em <strong>Compartilhar → Drinka Economiza</strong> e o painel abre com o link recebido.</p>
+<div class="card">
+<h2>Configurar o Atalho</h2>
+<div class="step"><strong>1.</strong> Abra o app <b>Atalhos</b> do iPhone e crie um atalho chamado <b>Drinka Economiza</b>.</div>
+<div class="step"><strong>2.</strong> Nos detalhes do Atalho, ative <b>Mostrar na Folha de Compartilhamento</b> e configure para receber <b>URLs</b> e <b>Texto</b>.</div>
+<div class="step"><strong>3.</strong> Adicione a ação <b>Codificar URL</b> (URL Encode) e escolha a variável <b>Entrada do Atalho</b> como texto de entrada.</div>
+<div class="step"><strong>4.</strong> Adicione a ação <b>Texto</b>. Digite <code>https://siteofertas.vercel.app/admin?shared=</code> e, logo após o sinal de igual, insira a variável <b>Texto Codificado</b> da etapa anterior.</div>
+<div class="step"><strong>5.</strong> Adicione a ação <b>Abrir URLs</b> e escolha o resultado da ação <b>Texto</b>. Salve o Atalho.</div>
+</div>
+<div class="card">
+<h2>Como usar</h2>
+<p>Na Shopee, abra o produto → <b>Compartilhar</b> → procure <b>Drinka Economiza</b> na lista de Atalhos. Ele abrirá o painel com o compartilhamento. Confirme a prévia e publique.</p>
+<p><strong>Alternativa sem configurar Atalhos:</strong> escolha <b>Copiar link</b> no aplicativo da loja, abra o ADM e toque em <b>Importar link copiado (iPhone)</b>.</p>
+<a class="btn" href="/admin">Abrir painel da Drinka</a>
+<small>A Apple permite que Atalhos recebam URLs e texto de outros aplicativos. O site não consegue aparecer sozinho na lista de compartilhamento do Safari; por isso usamos um Atalho. Se o texto compartilhado não contiver preço ou foto, o painel tentará buscar esses dados e pode não conseguir quando a loja bloquear a consulta. Não serão inventados valores.</small>
+</div>
+</main></body></html>
