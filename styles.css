@@ -660,3 +660,133 @@ body{
 @media(max-width:360px){
   .store-list .store-logo img{max-width:112px}
 }
+
+
+
+/* Banner final aprovado 2026-11: imagem real sem marcas antigas ou textos em duplicidade. */
+.promo-hero-shell.shell{
+  position:relative!important;
+  display:block!important;
+  width:calc(100% - 36px)!important;
+  max-width:1260px!important;
+  height:auto!important;
+  min-height:0!important;
+  margin:18px auto 0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:25px!important;
+  overflow:hidden!important;
+  background:#f26e13!important;
+  box-shadow:0 18px 52px rgba(114,56,18,.17)!important;
+  isolation:isolate;
+}
+.promo-banner-desktop{
+  display:block;
+  position:relative;
+  width:100%;
+  overflow:hidden;
+}
+.promo-banner-desktop>img{
+  display:block;
+  width:100%;
+  height:auto;
+  aspect-ratio:1500/657;
+  object-fit:cover;
+}
+.promo-hit{
+  display:block;
+  position:absolute;
+  z-index:2;
+  background:transparent;
+  border-radius:14px;
+  cursor:pointer;
+  outline-offset:-2px;
+}
+.promo-hit:focus-visible{
+  outline:3px solid #fff!important;
+  box-shadow:0 0 0 5px #923512;
+}
+.promo-hit-offers{left:3.5%;top:76.4%;width:15.0%;height:11.3%}
+.promo-hit-stores{left:18.8%;top:76.4%;width:15.5%;height:11.3%}
+.promo-banner-mobile{display:none}
+@media(max-width:760px){
+  .promo-hero-shell.shell{
+    display:block!important;
+    width:calc(100% - 24px)!important;
+    max-width:none!important;
+    margin:8px auto 0!important;
+    border-radius:19px!important;
+  }
+  .promo-banner-desktop{display:none!important}
+  .promo-banner-mobile{
+    display:flex!important;
+    flex-direction:column;
+    width:100%;
+    min-width:0;
+    overflow:hidden;
+  }
+  .promo-mobile-media{
+    display:block;
+    width:100%;
+    height:clamp(207px,55vw,280px);
+    min-height:0;
+    flex:none;
+    background-image:url('/assets/drinka-banner-novo.webp');
+    background-repeat:no-repeat;
+    background-size:auto 172%;
+    background-position:right 7%;
+    background-color:#e96913;
+  }
+  .promo-mobile-copy{
+    background:linear-gradient(150deg,#fff4e4 0%,#ffe2bc 61%,#ffcf93 100%);
+    padding:23px 22px 26px;
+    text-align:center;
+    color:#3e2014;
+  }
+  .promo-mobile-eyebrow{
+    display:block;
+    color:#a74d18;
+    font-weight:900;
+    font-size:11px;
+    letter-spacing:1.25px;
+    line-height:1.4;
+    margin:0 0 9px;
+  }
+  .promo-mobile-copy h1{
+    font:900 clamp(32px,9vw,46px)/1.06 'Outfit',Arial,sans-serif;
+    letter-spacing:-1.7px;
+    color:#341d13;
+    margin:0 0 11px;
+  }
+  .promo-mobile-copy h1 em{font-style:normal;color:#df6519}
+  .promo-mobile-copy p{
+    max-width:370px;
+    margin:0 auto 20px;
+    font-size:14px;
+    line-height:1.5;
+    color:#6c442b;
+  }
+  .promo-mobile-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    max-width:390px;
+    margin:0 auto;
+  }
+  .promo-mobile-actions a{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-width:0;
+    min-height:48px;
+    border-radius:12px;
+    font:800 13px/1.25 'DM Sans',Arial,sans-serif;
+    padding:11px 9px;
+    text-align:center;
+  }
+  .promo-mobile-primary{color:#fff;background:#ef761b}
+  .promo-mobile-secondary{color:#703a1d;background:#fff9ee;border:1px solid #ce9d69}
+}
+@media(min-width:761px) and (max-width:1100px){
+  .promo-hero-shell.shell{width:calc(100% - 28px)!important}
+}
