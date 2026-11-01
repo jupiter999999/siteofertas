@@ -850,3 +850,46 @@ img{max-width:100%}
     background-position:right center!important;
   }
 }
+
+
+/* Drinka Economiza — refinamento premium aprovado; apenas propriedades visuais. */
+html{background:#f6dcc0}
+body{
+  background:
+    radial-gradient(circle at top,rgba(255,248,239,.96) 0%,rgba(255,240,221,.94) 36%,rgba(247,220,192,.97) 100%),
+    linear-gradient(180deg,#fff4e7 0%,#fbe7d1 50%,#f4d6b7 100%)!important;
+  color:#311c12;
+}
+.shop{
+  background:linear-gradient(180deg,rgba(255,247,237,.72),rgba(249,232,212,.86));
+  border:1px solid rgba(193,145,104,.18);
+  border-radius:28px;
+  box-shadow:0 18px 45px rgba(109,61,25,.08);
+}
+.search-wrap{background:#fff8f1;border:1px solid #e4cfbc;box-shadow:0 6px 18px rgba(80,42,20,.05)}
+.filters button{background:#fff8f1;border-color:#e4cfbc;color:#6f5647}
+.filters button.active{background:#2f1d16;border-color:#2f1d16;color:#fff}
+.product-grid .card{
+  background:#fff8f1!important;
+  border:1px solid rgba(214,181,150,.65)!important;
+  box-shadow:0 14px 32px rgba(96,56,27,.08)!important;
+}
+.product-grid .card-image{
+  background:linear-gradient(180deg,#f8efe6,#f3e6d8)!important;
+  border-bottom:1px solid #ead8c8!important;
+}
+.product-grid .card-body{background:#fffaf4!important}
+.product-grid .card h3{color:#2d1d15}
+.product-grid .shop-label{color:#a86433}
+.product-grid .card .price{color:#bf6426!important}
+.product-grid .card .old{color:#9a8576}
+.product-grid .card-cta{
+  background:linear-gradient(180deg,#3a241a,#2b1912)!important;
+  color:#fff!important;
+  box-shadow:0 8px 18px rgba(58,36,26,.18);
+}
+.product-grid .card-cta:hover,.product-grid .card-cta:focus-visible{
+  background:linear-gradient(180deg,#c56a2c,#a85420)!important;
+}
+.disclaimer{color:#8d7768}
+@media(max-width:760px){.shop{border-radius:20px}}
